@@ -1,0 +1,11 @@
+---
+title: "About"
+author: "Karim Veljee"
+format: 
+  html:
+    theme: "flatly"
+    highlight-style: "tango"
+    number-sections: true
+---
+
+I am a Data Analytics professional with a solid foundation in project management, research, and finance. My career has spanned from managing intricate financial transactions in investment banking to spearheading research projects that impact educational policies. At each turn, I have leveraged my analytical acumen to uncover insights and drive strategic decisions. Whether it's enhancing data processes in a university setting or managing research budgets in academia, my approach combines meticulous analysis with strategic oversight. I am passionate about using data to solve complex problems and create meaningful change, bridging the gap between numbers and narrative in every project I undertake.

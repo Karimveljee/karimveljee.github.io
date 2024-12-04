@@ -1,0 +1,27 @@
+---
+title: "Project"
+author: "Karim Veljee"
+format: 
+  html:
+    theme: "flatly"
+    highlight-style: "tango"
+    number-sections: true
+---
+
+## Dashboard
+
+<iframe width="800" height="600" src="https://alumnihw.shinyapps.io/campaign/" frameborder="0"></iframe>
+
+## Project Report
+
+<iframe src="chan_finalproject.pdf" style="width:100%; height:500px;" frameborder="0"></iframe>
+
+## Project Proposal
+
+<iframe src="chan_proposal.pdf" style="width:100%; height:500px;" frameborder="0"></iframe>
+
+## Project Proposal Presentation
+
+<iframe src="chan_presentation slides.pdf" style="width:100%; height:500px;" frameborder="0"></iframe>
+
+

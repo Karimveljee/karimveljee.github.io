@@ -1,0 +1,76 @@
+---
+title: "Assignment 6"
+author: "Karim Veljee"
+format: 
+  html:
+    toc: true
+    theme: "flatly"
+    highlight-style: "tango"
+    number-sections: true
+---
+
+## Hong Kong Identity
+
+<iframe width="800" height="600" src="https://karimdibpl.shinyapps.io/HKApp/">
+
+</iframe>
+
+## Reactivity
+
+<iframe width="800" height="600" src="https://karimdibpl.shinyapps.io/reactivity/">
+
+</iframe>
+
+## Horsepower
+
+```{r}
+
+library(shiny)
+library(datasets)
+
+# Load the mtcars dataset
+data("mtcars")
+mpgData <- mtcars
+mpgData$am <- factor(mpgData$am, labels = c("Automatic", "Manual"))  # Enhance factor labels for 'am'
+
+# Define UI for the application
+ui <- fluidPage(
+  titlePanel("Horsepower Analysis"),
+  sidebarLayout(
+    sidebarPanel(
+      selectInput("variable", "Variable:",
+                  choices = c("Cylinders" = "cyl", "Transmission" = "am", "Gears" = "gear")),
+      checkboxInput("outliers", "Show outliers", TRUE)
+    ),
+    mainPanel(
+      h3(textOutput("caption")),
+      plotOutput("hpPlot")
+    )
+  )
+)
+
+# Define server logic for the application
+server <- function(input, output) {
+  # Compute the formula text dynamically based on user input
+  formulaText <- reactive({
+    paste("hp ~", input$variable)  # Construct the formula for plotting
+  })
+
+  # Display the current formula as a caption
+  output$caption <- renderText({
+    formulaText()
+  })
+
+  # Generate a plot based on the selected variable and outlier preference
+  output$hpPlot <- renderPlot({
+    boxplot(as.formula(formulaText()), data = mpgData, outline = input$outliers,
+            col = "#75AADB", pch = 19)  # Custom styling
+  })
+}
+
+# Run the application
+shinyApp(ui, server)
+
+```
+
+![](images/horsepower.png){width="616"}

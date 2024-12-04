@@ -1,0 +1,340 @@
+---
+title: "Assignment 5"
+author: "Karim Veljee"
+format: 
+  html:
+    toc: true
+    theme: "flatly"
+    highlight-style: "tango"
+    number-sections: true
+---
+
+## Base R Graphics
+
+### Histogram
+
+```{r}
+
+# Load the data
+roaddeaths <- read.csv("C:/Users/kxi220002/Downloads/Road traffic accidents.csv")
+
+# Filter the dataset for the year 2019
+year_2019_data <- subset(roaddeaths, Year == 201)
+
+# Filter the dataset for Pakistan
+usa<- subset(roaddeaths, Country == "United States of America" 
+                   & Age.Group == "[All]" & Sex == "All")
+
+usa_numbers<- usa$Number
+
+# Create a histogram
+hist(usa_numbers, 
+     main = "Distribution of USA Road Accident Deaths",
+     xlab = "Number of Road Deaths",
+     ylab = "Frequency",
+     col = "darkred",  # Bar color
+     border = "black",   # Border color
+     xlim = c(min(usa_numbers), max(usa_numbers)),
+     axes = TRUE,
+     labels = FALSE,
+     probability = FALSE)  # Set to FALSE to get frequency and not probability density
+
+```
+
+### Horizontal Bar Chart
+
+```{r}
+
+# Load the data
+roaddeaths <- read.csv("C:/Users/kxi220002/Downloads/Road traffic accidents.csv")
+
+
+# Filter the dataset for the year 2019
+usa_2019 <- subset(roaddeaths, Country == "United States of America" 
+                   & Age.Group != "[All]" & Age.Group != "[Unknown]"
+                   & Year == 2019 & Sex == "All")
+
+# Reorder the levels of Age.Group
+usa_2019$Age.Group <- factor(usa_2019$Age.Group, 
+                             levels = c("[0]", "[1-4]", "[5-9]", "[10-14]", "[15-19]",
+                                        "[20-24]", "[25-29]", "[30-34]", "[35-39]",
+                                        "[40-44]", "[45-49]", "[50-54]", "[55-59]", 
+                                        "[60-64]", "[65-69]", "[70-74]", "[75-79]", 
+                                        "[80-84]", "[85+]"))
+
+# Create a matrix of values for the barplot (using "Number" as width)
+barplot_matrix <- t(table(usa_2019$Age.Group) * usa_2019$Number)
+
+# Create the horizontal bar plot
+barplot(barplot_matrix, beside = TRUE, col = "darkgrey", horiz = TRUE,
+        main = "Road Accident Deaths in the USA by Age Group (2019)",
+        ylab = "Age Group", xlab = "Number of Road Traffic Accidents")
+```
+
+### Vertical Bar Chart
+
+```{r}
+
+# Load the data
+roaddeaths <- read.csv("C:/Users/kxi220002/Downloads/Road traffic accidents.csv")
+
+# Filter the dataset for the year 2019
+year_2019_data <- subset(roaddeaths, Year == 2019)
+# Define the list of countries you want to select
+selected_countries <- c("United States of America", "Germany", "Japan",
+                        "United Kingdom of Great Britain and Northern Ireland", "Italy", "Canada", "France")
+
+# Filter the dataset for the selected countries
+selected_data <- subset(roaddeaths, Country %in% selected_countries 
+                        & Age.Group == "[All]" & Sex != "All" & Year == 2019)
+
+# Define custom colors for the gender
+custom_colors <- c("Male" = "skyblue", "Female" = "lightpink")
+
+# Create the bar plot
+barplot(height = selected_data$Number, beside = TRUE, col = custom_colors,
+        names.arg = selected_data$Country.Code,
+        main = "Road Accident Deaths for G7 Countries (2019)",
+        xlab = "Country", ylab = "Number of Road Traffic Accidents")
+
+# Add a legend
+legend("center", legend = names(custom_colors), fill = custom_colors)
+```
+
+### Pie Chart
+
+```{r}
+
+# Load the data
+roaddeaths <- read.csv("C:/Users/kxi220002/Downloads/Road traffic accidents.csv")
+
+# Filter the dataset for the USA, year 2019, all ages, and specific gender
+usa_2019_gender <- subset(roaddeaths, Country == "United States of America" 
+                          & Year == 2019 & Age.Group == "[All]" & Sex != "All")
+
+# Sum deaths by gender
+gender_deaths <- tapply(usa_2019_gender$Number, usa_2019_gender$Sex, sum)
+
+# Create a pie chart
+pie(gender_deaths,
+    main = "Proportion of Road Accident Deaths by Gender in USA (2019)",
+    col = c("skyblue", "lightpink"),
+    labels = paste(names(gender_deaths), "\n", gender_deaths))
+
+# Add a legend
+legend("bottomright", legend = names(gender_deaths), fill = c("skyblue", "lightpink"))
+
+```
+
+### Boxplot
+
+```{r}
+
+# Load the data
+roaddeaths <- read.csv("C:/Users/kxi220002/Downloads/Road traffic accidents.csv")
+
+# Filter for selected countries and 2019
+selected_data <- subset(roaddeaths, Country %in% c("United States of America", "Germany", "Japan",
+                                                   "United Kingdom", "Italy", "Canada", "France")
+                        & Year == 2019 & Age.Group == "[All]" & Sex == "All")
+
+# Create a boxplot
+boxplot(Number ~ Country, data = selected_data,
+        main = "Boxplot of Road Accident Deaths by Country (2019)",
+        ylab = "Number of Road Traffic Accidents",
+        col = rainbow(n = length(unique(selected_data$Country))),
+        las = 1)  # Orient axis labels vertically
+
+```
+
+### Scatterplot
+
+```{r}
+
+# Load the data
+roaddeaths <- read.csv("C:/Users/kxi220002/Downloads/Road traffic accidents.csv")
+
+# Filter the dataset for the USA, 2019, and not unknown age groups
+usa_2019_ages <- subset(roaddeaths, Country == "United States of America" 
+                        & Year == 2019 & Age.Group != "[Unknown]" & Age.Group != "[All]" & Sex == "All")
+
+# Convert age groups to a numeric scale for plotting
+usa_2019_ages$Age.Numeric <- as.numeric(as.factor(usa_2019_ages$Age.Group))
+
+# Create a scatterplot
+plot(usa_2019_ages$Age.Numeric, usa_2019_ages$Number,
+     main = "Scatterplot of Road Accident Deaths by Age Group in USA (2019)",
+     xlab = "Age Group (Encoded)",
+     ylab = "Number of Road Traffic Accidents",
+     pch = 19,
+     col = "green")
+
+```
+
+## ggplot2
+
+### Histogram
+
+```{r}
+library(ggplot2)
+
+# Load the data
+roaddeaths <- read.csv("C:/Users/kxi220002/Downloads/Road traffic accidents.csv")
+
+# Filter the dataset for the USA, 2019, and not the "All" age group
+usa_ages_2019 <- subset(roaddeaths, Country == "United States of America" &
+                                     Year == 2019 &
+                                     Age.Group != "[All]" & 
+                                     Age.Group != "[Unknown]" &
+                                     Sex == "All")
+
+# Plot a histogram for age-wise distribution of road accident deaths
+ggplot(usa_ages_2019, aes(x = Age.Group, y = Number)) + 
+  geom_bar(stat = "identity", fill = "steelblue") +
+  ggtitle("Age-Wise Distribution of Road Accident Deaths in USA (2019)") +
+  xlab("Age Group") +
+  ylab("Number of Road Traffic Accidents") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+### Horizontal Bar Chart
+
+```{r}
+
+library(ggplot2)
+library(dplyr)
+
+# Load the data
+roaddeaths <- read.csv("C:/Users/kxi220002/Downloads/Road traffic accidents.csv")
+
+# Filter the dataset for the year 2019
+year_2019_data <- subset(roaddeaths, Year == 2019)
+# Filter the dataset for USA
+usa_2019 <- subset(year_2019_data, Country == "United States of America" 
+                   & Age.Group != "[All]" & Age.Group != "[Unknown]")
+
+# Reorder the levels of Age.Group
+usa_2019$Age.Group <- factor(usa_2019$Age.Group, 
+                             levels = c("[0]", "[1-4]", "[5-9]", "[10-14]", "[15-19]",
+                                        "[20-24]", "[25-29]", "[30-34]", "[35-39]",
+                                        "[40-44]", "[45-49]", "[50-54]", "[55-59]", 
+                                        "[60-64]", "[65-69]", "[70-74]", "[75-79]", 
+                                        "[80-84]", "[85+]"))
+
+# Create the bar plot
+
+ggplot(usa_2019, aes(x = Number)) +
+  geom_bar(aes(y = Age.Group), position = "dodge", stat = "identity", fill = "orange") +
+  labs(
+    title = "Road Accident Deaths in the USA by Age Group (2019)",
+    x = "Number of Road Traffic Accidents",
+    y = "Age Group"
+  ) +
+  theme_minimal()
+
+```
+
+### Vertical Bar Chart
+
+```{r}
+
+library(dplyr)
+library(ggplot2)
+
+# Load the data
+roaddeaths <- read.csv("C:/Users/kxi220002/Downloads/Road traffic accidents.csv")
+
+# Filter the dataset for the year 2019
+year_2019_data <- subset(roaddeaths, Year == 2019)
+
+# Define the list of countries
+selected_countries <- c("United States of America", "Germany", "Japan",
+"United Kingdom of Great Britain and Northern Ireland", "Italy", "Canada", "France")
+
+# Filter the dataset for the selected countries
+selected_data <- subset(roaddeaths, Country %in% selected_countries 
+                        & Age.Group == "[All]" & Sex != "All" & Year == 2019)
+# Define custom colors for the gender
+custom_colors <- c("Male" = "skyblue", "Female" = "pink")
+
+# Create the bar plot
+ggplot(selected_data, aes(x = Country.Code, y = Number, fill = Sex)) +
+  geom_bar(position = "dodge", stat = "identity") +
+  labs(
+    title = "Road Accident Deaths by Gender for G7 Countries (2019)",
+    x = "Country",
+    y = "Number of Road Traffic Accidents"
+  ) +
+  scale_fill_manual(values = custom_colors) +  # Specify custom colors
+  theme_minimal()
+
+```
+
+### Pie Chart
+
+```{r}
+
+library(ggplot2)
+
+# Load and prepare the data
+roaddeaths <- read.csv("C:/Users/kxi220002/Downloads/Road traffic accidents.csv")
+usa <- subset(roaddeaths, Country == "United States of America" & Year == 2019 & Age.Group == "[All]" & Sex == "All")
+
+# Sum deaths by gender for the USA in 2019
+usa_2019_gender <- subset(roaddeaths, Country == "United States of America" & Year == 2019 & Age.Group == "[All]" & Sex != "All")
+gender_deaths <- usa_2019_gender %>%
+  group_by(Sex) %>%
+  summarise(Number = sum(Number))
+
+# Using coord_polar to create a pie chart
+ggplot(gender_deaths, aes(x = "", y = Number, fill = Sex)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar(theta = "y") +
+  theme_void() +
+  ggtitle("Proportion of Road Accident Deaths by Gender in USA (2019)")
+```
+
+### Boxplot
+
+```{r}
+
+library(ggplot2)
+
+# Load and prepare the data
+roaddeaths <- read.csv("C:/Users/kxi220002/Downloads/Road traffic accidents.csv")
+usa <- subset(roaddeaths, Country == "United States of America" & Year == 2019 & Age.Group == "[All]" & Sex == "All")
+
+# Filter data for selected countries in 2019
+selected_countries <- c("United States of America", "Germany", "Japan", "United Kingdom", "Italy", "Canada", "France")
+selected_data <- subset(roaddeaths, Country %in% selected_countries & Year == 2019 & Age.Group == "[All]" & Sex == "All")
+
+ggplot(selected_data, aes(x = Country, y = Number, fill = Country)) +
+  geom_boxplot(outlier.colour = "red", outlier.shape = 1, width = 0.6) +  # Show outliers in red, adjust width
+  ggtitle("Boxplot of Road Accident Deaths by Country (2019)") +
+  ylab("Number of Road Traffic Accidents") +
+  xlab("Country") +
+  ylim(0, 500) +  # Adjust this limit based on your specific data range
+  scale_y_continuous(trans = 'log10') +  # Apply a logarithmic transformation
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+### Scatterplot
+
+```{r}
+
+library(ggplot2)
+
+# Load and prepare the data
+roaddeaths <- read.csv("C:/Users/kxi220002/Downloads/Road traffic accidents.csv")
+usa <- subset(roaddeaths, Country == "United States of America" & Year == 2019 & Age.Group == "[All]" & Sex == "All")
+
+ggplot(usa_2019_ages, aes(x = Age.Group, y = Number)) +
+  geom_point(aes(color = Age.Group), size = 3) +
+  ggtitle("Scatterplot of Road Accident Deaths by Age Group in USA (2019)") +
+  xlab("Age Group") +
+  ylab("Number of Road Traffic Accidents") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```

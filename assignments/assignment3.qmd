@@ -1,0 +1,172 @@
+---
+title: "Assignment 3"
+author: "Karim Veljee"
+format: 
+  html:
+    toc: true
+    theme: "flatly"
+    highlight-style: "tango"
+    number-sections: true
+---
+
+## Rerun Murrell01.R
+
+```{r}
+
+# Histogram
+# Random data
+
+# Generate 50 random data points from a standard normal distribution
+Y <- rnorm(50)
+
+# Make sure no Y exceed [-3.5, 3.5]
+# This line filters out any values in Y that are less than -3.5 or greater than 3.5 by setting them to NA
+# Useful for limiting the data range and focusing the histogram on a specific interval
+Y[Y < -3.5 | Y > 3.5] <- NA # Selection/set range
+
+# Create a sequence from -3.5 to 3.5, incremented by 0.1, for x-axis points
+# Useful for plotting the normal density later
+x <- seq(-3.5, 3.5, .1)
+
+# Compute the normal density at each point in x
+dn <- dnorm(x)
+
+# Set the margins of the plot (bottom, left, top, right) measured in lines of text
+# Here, the right margin is reduced to zero to adjust how the plot fits in the plotting area
+par(mar=c(4.5, 4.1, 3.1, 0))
+
+# Plot a histogram of Y
+# `breaks=seq(-3.5, 3.5)` sets the boundaries of the bins for the histogram
+# `ylim=c(0, 0.5)` sets the y-axis limits
+# `col="gray80"` sets the bar color to light gray
+# `freq=FALSE` normalizes the histogram, turning it into a density plot
+hist(Y, breaks=seq(-3.5, 3.5), ylim=c(0, 0.5), 
+     col="gray80", freq=FALSE)
+
+# Overlay a line graph of the normal distribution density
+# `lwd=2` sets the line width to 2, making it thicker for better visibility
+lines(x, dnorm(x), lwd=2)
+
+# Reset the margins after plotting
+# Ensures that any subsequent plots have standard margins
+par(mar=c(5.1, 4.1, 4.1, 2.1))
+
+```
+
+## Rerun anscombe01.R
+
+```{r}
+
+plot.new()
+data(anscombe)
+plot(anscombe$x1,anscombe$y1)
+
+lm1 <- lm(y1 ~ x1, data=anscombe)
+lm2 <- lm(y2 ~ x2, data=anscombe)
+lm3 <- lm(y3 ~ x3, data=anscombe)
+lm4 <- lm(y4 ~ x4, data=anscombe)
+
+ff <- y ~ x
+mods <- setNames(as.list(1:4), paste0("lm", 1:4))
+
+for(i in 1:4) {
+  ff[2:3] <- lapply(paste0(c("y","x"), i), as.name)
+  ## or   ff[[2]] <- as.name(paste0("y", i))
+  ##      ff[[3]] <- as.name(paste0("x", i))
+  mods[[i]] <- lmi <- lm(ff, data = anscombe)
+  print(anova(lmi))}
+sapply(mods, coef)  # Note the use of this function
+lapply(mods, function(fm) coef(summary(fm)))
+op <- par(mfrow = c(2, 2), mar = 0.1+c(4,4,1,1), oma =  c(0, 0, 2, 0)) 
+
+# Changing color
+# changing Characters to 20 type 
+# Changing CEX to 1.2
+for(i in 1:4) {
+  ff[2:3] <- lapply(paste0(c("y","x"), i), as.name)
+  plot(ff, data = anscombe, col = "darkblue", pch = 20, cex = 1.2,
+       xlim = c(3, 19), ylim = c(3, 13))
+  abline(mods[[i]], col = "red", lty="longdash")}
+mtext("Chantan's 4 Regression data sets", outer = TRUE, cex = 1.5)
+par(op)
+```
+
+## Finetune charts
+
+```{r}
+
+plot.new()
+par(mfrow = c(2, 2), mar = 0.1+c(4,4,1,1), oma =  c(0, 0, 2, 0), 
+    bg="gray90")
+
+#Changing color
+for(i in 1:4) {
+  ff[2:3] <- lapply(paste0(c("y","x"), i), as.name)
+  plot(ff, data = anscombe, family="serif", col = "brown", pch = 21, bg = "lightblue", 
+       cex = 1.5, xlim = c(3, 19), ylim = c(3, 13))
+  abline(mods[[i]], col = "yellow", lty="longdash")}
+
+#Changing font to serif
+mtext("Chantan's 4 Regression data sets", family="serif", outer = TRUE, cex = 1.5)
+```
+
+## ggplot2
+
+```{r}
+
+library(tidyverse)
+
+ggplot(anscombe, aes(x1,y1)) + 
+  geom_point(shape = 21, color = "brown", fill = "lightblue", size = 4) + 
+  geom_smooth(method = "lm", color = "yellow", linetype = "longdash", se = FALSE) + 
+  theme_classic(base_family = "serif") + 
+  labs(title="Chantan's Regession data set") + 
+  theme(plot.background = element_rect(fill = "gray90"), 
+        panel.background = element_rect(fill = "gray90"),
+        plot.title = element_text(face = "bold", hjust = 0.5, size = 20))
+```
+
+## Pre-hackathon
+
+```{r}
+
+# Load the data
+owidall <- read.csv("https://github.com/owid/covid-19-data/blob/master/public/data/owid-covid-data.csv?raw=true")
+owidall <- owidall[owidall$iso_code != "OWID", ]  # Remove 'OWID' cases
+owideu <- subset(owidall, continent == "Europe")  # Filter European data
+
+# Filter data for the date range and ensure it's sorted by date
+owideu <- subset(owideu, date >= "2020-01-01" & date <= "2023-08-31")
+owideu$date <- as.Date(owideu$date)  # Convert date to Date class
+owideu <- owideu[order(owideu$date), ]  # Order by date
+
+# Adjusting plot margins to make better use of space
+par(mar = c(4, 5, 2, 2) + 0.3)  # Adjust margins: bottom, left, top, right
+
+# Plot setup with specified axis limits and no default axes
+plot(owideu$date, owideu$new_deaths, type = 'p', col = rgb(214/255, 20/255, 133/255), 
+     xlab = "", ylab = "", xlim = range(owideu$date), ylim = c(0, 6000), xaxt = 'n', yaxt = 'n',
+     pch = 19, cex = 0.4)  # Reduced point size for clarity
+
+# Adding a loess smoothed trend line
+lines(lowess(owideu$date, owideu$new_deaths), col = rgb(255/255, 105/255, 180/255))  # Adjusted for a pinker color
+
+# Customize the x-axis to show specific dates only and not auto-generate year markers
+axis_dates <- c("2020-01-01", "2020-02-01", "2020-04-01", "2020-06-01", "2020-08-01", 
+                "2020-10-01", "2020-11-01", "2021-01-01", "2021-03-01", "2021-05-01",
+                "2021-07-01", "2021-08-01", "2021-10-01", "2021-12-01", "2022-02-01", 
+                "2022-04-01", "2022-06-01", "2022-07-01", "2022-09-01", "2022-11-01", 
+                "2023-01-01", "2023-03-01", "2023-04-01", "2023-06-01", "2023-08-01")
+axis(1, at = as.Date(axis_dates), labels = format(as.Date(axis_dates), "%Y-%m"), las = 2, cex.axis = 0.5, tck = -0.0001)
+
+# Customize the y-axis with specified breaks and vertical labels
+axis(2, at = c(0, 1000, 3000, 5000), labels = c("0", "1000", "3000", "5000"), las = 0, cex.axis = 0.5)
+
+# Add x-axis and y-axis labels with adjusted font size and position
+mtext("Date", side = 1, line = 3, cex = 0.7)
+mtext("COVID Deaths in Europe (Daily)", side = 2, line = 2, cex = 0.7)
+
+# Add a box around the plot
+box()
+
+```

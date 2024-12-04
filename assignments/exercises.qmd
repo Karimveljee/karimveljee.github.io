@@ -1,0 +1,132 @@
+---
+title: "Exercises"
+author: "Karim Veljee"
+format: 
+  html:
+    toc: true
+    theme: "flatly"
+    highlight-style: "tango"
+    number-sections: true
+---
+
+## Review: Edward Tufte's 'The Future of Data Analysis'
+
+In his 2016 presentation, Edward Tufte discusses the evolution of data visualization, emphasizing the need for clarity, precision, and efficiency in presentations. He advocates for integrating statistical thinking with visual design to enhance understanding and decision-making. Tufte highlights the importance of data density in visualizations, using Google Maps as an example of effective complex data communication.
+
+Tufte also addresses the replication crisis in research, citing significant studies to emphasize the need for honest and rigorous data analysis. He warns against manipulating data to fit narratives, suggesting that confirmatory data analysis should adhere to pre-specified methods like those used by the CDC.
+
+Moreover, Tufte encourages a hands-on approach to understanding data generation and its real-world implications. This method promotes a comprehensive understanding of data and its context, which is crucial for producing relevant and reliable visual representations.
+
+Overall, Tufte's lecture serves as both a critical examination of current practices in data analysis and a guide to future innovations. His call for integrity in data visualization and analysis resonates strongly with anyone aspiring to enter the field, offering essential insights for conducting ethical and effective research.
+
+## Literate Programming
+
+Literate Programming, introduced by Donald Knuth in 1984, encourages programmers to integrate comprehensive documentation directly with their code. This method focuses on enhancing the readability of code, ensuring that it's understandable to humans as well as executable by machines.
+
+Knuth advocated for a shift in perspective: programmers should prioritize explaining their logic to humans, not just instructing computers. This involves embedding code within a narrative that explains what the computer is supposed to do, making the codebase more accessible and easier to maintain.
+
+Tools like R Markdown and Jupyter Notebooks facilitate this approach by allowing the integration of narrative text with executable code, which is particularly valuable in research for ensuring reproducibility and transparency.
+
+## Review of Stephen Malinowski's Music Visualization
+
+Stephen Malinowski’s visualization of Bach’s compositions through his YouTube video is an intriguing exploration into the synthesis of visual arts and classical music. By employing a detailed mapping system where musical notes are linked to specific visual symbols, Malinowski enhances the auditory experience with corresponding visual cues, making the complexities of classical compositions more accessible and engaging.
+
+In his video, Malinowski assigns different shapes to represent various musical elements, while colors shift to reflect changes in pitch and intensity. This method not only illustrates the music’s structure but also its emotional depth, allowing viewers to perceive subtle shifts in tone and rhythm visually. For instance, a transition to a minor key might be represented by cooler colors, guiding the viewer through the music’s emotive journey.
+
+The size and motion of these shapes correspond directly to the dynamics and duration of the notes, effectively translating the music’s texture into a visual format. This innovative approach does more than just accompany the music; it opens up a new avenue for understanding and appreciating complex musical narratives without needing a formal background in music theory.
+
+Malinowski's work is a compelling demonstration of how visual elements can transform our experience of music. The combination of auditory and visual stimuli not only makes classical music more approachable but also enriches the listening experience, offering a multi-sensory exploration of musical storytelling. His approach could serve as a valuable educational tool, offering a new perspective on music analysis and appreciation.
+
+## Big Data Analytics Pitfalls and Overfitting
+
+Navigating through the vast seas of big data, I have come to recognize its immense potential and pitfalls. The allure of big data often leads to the assumption that sheer volume equates to veracity, a misconception famously critiqued through the failures of Google Flu Trends. This initiative aimed to predict flu outbreaks using search data but faltered, significantly overestimating flu cases. This example starkly illustrates that big data is not a panacea; it must be carefully curated and analyzed, blending traditional methodologies to enhance its reliability and validity.
+
+Moreover, my journey through data science has underscored the dangers of overfitting—tailoring models too closely to specific datasets. This practice, while initially seeming to improve accuracy, actually degrades the model's applicability to new data. It’s a compelling reminder of the balance needed between model complexity and interpretability. Overparameterization further exacerbates this issue, introducing too many variables and making the model overly sensitive to minor data fluctuations.
+
+These experiences have taught me the importance of skepticism and rigor in data analysis. As budding data scientists, we must strive to ensure our models not only fit the data but also reveal the underlying truths, maintaining a steadfast commitment to accuracy and generalizability.
+
+## Hackathon 1
+
+```{r}
+
+library(ggplot2)
+library(dplyr)
+library(gridExtra)
+library(ggthemes)
+library(RColorBrewer)
+
+# Color palette
+palette_cut <- brewer.pal(n = 5, name = "Dark2")
+
+# Base size for themes
+base_size <- 8  # Further reduced for better proportionality
+
+# Histogram
+hist_plot <- ggplot(diamonds, aes(x = price)) +
+  geom_histogram(aes(y = after_stat(density)), bins = 30, fill = "gray80", color = "lightblue") +
+  stat_function(fun = dnorm, args = list(mean = mean(diamonds$price), sd = sd(diamonds$price)), color = "red", size = 0.75) +
+  labs(title = "Histogram of Diamond Prices", x = "Price", y = "Density") +
+  theme_minimal(base_size = base_size) +
+  theme(plot.title = element_text(size = 12), axis.title = element_text(size = 10))
+
+# Bar Plot
+bar_plot <- diamonds %>%
+  group_by(cut) %>%
+  summarise(count = n(), .groups = "drop") %>%
+  ggplot(aes(x = cut, y = count, fill = cut)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Bar Plot: Count of Diamonds by Cut", x = "Cut", y = "Count") +
+  scale_fill_manual(values = palette_cut) +
+  theme_minimal(base_size = base_size) +
+  theme(plot.title = element_text(size = 12), legend.text = element_text(size = 8), legend.title = element_text(size = 10))
+
+# Box Plot
+box_plot <- ggplot(diamonds, aes(x = cut, y = price, fill = cut)) +
+  geom_boxplot() +
+  labs(title = "Box Plot: Price Distribution by Cut", x = "Cut", y = "Price") +
+  scale_fill_manual(values = palette_cut) +
+  theme_minimal(base_size = base_size) +
+  theme(plot.title = element_text(size = 12), axis.title = element_text(size = 10))
+
+# Scatter Plot
+facet_scatter <- ggplot(diamonds, aes(x = carat, y = price, color = color)) +
+  geom_point(alpha = 0.5, size = 1) +
+  facet_wrap(~ cut) +
+  labs(title = "Faceted Scatter Plot: Carat vs Price by Color", x = "Carat", y = "Price") +
+  scale_color_brewer(palette = "Set1") +
+  theme_minimal(base_size = base_size) +
+  theme(plot.title = element_text(size = 12))
+
+# Heatmap
+heatmap_data <- diamonds %>%
+  group_by(cut, color) %>%
+  summarise(avg_price = mean(price), .groups = "drop")
+heatmap <- ggplot(heatmap_data, aes(x = cut, y = color, fill = avg_price)) +
+  geom_tile(color = "white") +
+  scale_fill_gradient(low = "lightgreen", high = "darkgreen") +
+  labs(title = "Heatmap: Average Price by Cut and Color", x = "Cut", y = "Color") +
+  theme_minimal(base_size = base_size) +
+  theme(plot.title = element_text(size = 12))
+
+# Pie Chart
+pie_data <- diamonds %>%
+  group_by(cut) %>%
+  summarise(count = n(), .groups = "drop") %>%
+  mutate(percentage = count / sum(count))
+pie_chart <- ggplot(pie_data, aes(x = "", y = percentage, fill = cut)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar(theta = "y") +
+  labs(title = "Pie Chart of Diamond Cuts") +
+  scale_fill_brewer(palette = "Dark2") +
+  theme_void(base_size = base_size) +
+  theme(plot.title = element_text(size = 12))
+
+# Arrange all plots
+grid.arrange(
+  hist_plot, bar_plot,
+  box_plot, facet_scatter,
+  heatmap, pie_chart,
+  ncol = 2
+)
+
+```

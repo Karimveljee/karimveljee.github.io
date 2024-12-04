@@ -1,0 +1,11 @@
+---
+title: "Karim Veljee"
+---
+
+![](images/Karim.jpg){width="225"}
+
+## Greetings!
+
+Welcome to my website. I am pursuing MS in Social Data Analytics from the University of Texas at Dallas.
+
+Please contact me at <a href="mailto:karim.veljee@gmail.com">karim.veljee\@gmail.com</a>

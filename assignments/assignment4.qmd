@@ -1,0 +1,153 @@
+---
+title: "Assignment 4"
+author: "Karim Veljee"
+format: 
+  html:
+    toc: true
+    theme: "flatly"
+    highlight-style: "tango"
+    number-sections: true
+---
+
+## Hackathon 1.0
+
+## Variable with Column Chart
+
+```{r}
+
+library(dplyr)
+library(ggplot2)
+
+roaddeaths <- read.csv("C:/Users/kxi220002/Downloads/Road traffic accidents.csv")
+
+year_2021_data <- subset(roaddeaths, Year == 2021)
+
+# Filter total deaths for all ages and both sexes
+total_deaths_2021 <- year_2021_data %>%
+  filter(Sex == "All" & Age.Group == "[All]")
+
+# Specify the number of top countries 
+T <- 5
+# Get the top 5 countries with the highest road accidents in 2019
+top_5_countries <- total_deaths_2021 %>%
+  top_n(T, Number)
+
+top_5_countries
+
+#Some calculations for ploting
+top_5_countries$wc <- cumsum(top_5_countries$Death.rate.per.100.000.population)
+top_5_countries$sp <-top_5_countries$wc - top_5_countries$Death.rate.per.100.000.population
+top_5_countries$mp <- with(top_5_countries,sp +(wc-sp)/2)
+
+top_5_countries$wc
+top_5_countries$mp
+
+# plotting
+
+custom_colors <- c("Australia" = "darkred", "Ecuador" = "orange", 
+                   "Spain" = "seagreen", "Kazakhstan" = "skyblue", 
+                   "Serbia" = "orchid")
+ggplot(top_5_countries, aes(ymin= 0)) +
+  geom_rect((aes(xmin = sp, xmax = wc, ymax = Number, fill = Country))) +
+  geom_text(aes(x = mp, y = Number * 0.5, label = c("Australia", "Ecuador", 
+                                                    "Spain", "Kazakhstan", "Serbia"))) + 
+  theme_bw() + 
+  theme(legend.position = "none") + 
+  labs(
+    title = "Road Accidents Deaths and Death Rates for Countries with Highest Mortality",
+    x = "Death Rate (per 100,000 population)",
+    y = "Number of Road Accident Deaths",
+  ) +
+  scale_fill_manual(values = custom_colors)
+
+
+```
+
+## Table or Table with Embedded Charts
+
+```{r}
+
+library(dplyr)
+library(ggplot2)
+library(reshape2)
+
+roaddeaths <- read.csv("C:/Users/kxi220002/Downloads/Road traffic accidents.csv")
+
+year_2019_2020_data <- subset(roaddeaths, Year == 2019 | Year == 2020)
+
+road_deaths_2019_2020 <- year_2019_2020_data %>%
+  filter(Sex == "All" & Age.Group == "[All]")
+
+# Specify the number of top countries
+T <- 4
+
+# Get the top 4 countries with the highest road accident deaths
+top_countries<- road_deaths_2019_2020 %>%
+  top_n(T,Number )
+
+custom_colors <- c("2019" = "brown", "2020" = "darkgreen")
+
+ggplot(top_countries, aes(x = Country, y = Number, fill = as.factor(Year))) +
+  geom_bar(position = "dodge", stat = "identity") +
+  facet_grid(~ Country, scales = "free_y") +
+  theme(axis.text.x = element_blank()) +
+  labs(title = "Road Accident Deaths", x = NULL, y = "Number of Deaths") +
+  scale_fill_manual(values = custom_colors)
+```
+
+## Bar Chart
+
+```{r}
+
+library(ggplot2)
+library(dplyr)
+
+roaddeaths <- read.csv("C:/Users/kxi220002/Downloads/Road traffic accidents.csv")
+
+year_2019_data <- subset(roaddeaths, Year == 2019)
+
+# Filter the dataset for USA
+usa_2019 <- subset(year_2019_data, Country == "United States of America" 
+                   & Age.Group != "[All]" & Age.Group != "[Unknown]")
+
+# Reorder the levels of Age.Group
+usa_2019$Age.Group <- factor(usa_2019$Age.Group, 
+                             levels = c("[0]", "[1-4]", "[5-9]", "[10-14]", 
+                                        "[15-19]", "[20-24]", "[25-29]", "[30-34]",                                         "[35-39]", "[40-44]", "[45-49]", "[50-54]",                                         "[55-59]", "[60-64]", "[65-69]", "[70-74]",                                         "[75-79]", "[80-84]", "[85+]"))
+
+# Create the bar plot
+ggplot(usa_2019, aes(x = Number)) +
+  geom_bar(aes(y = Age.Group), position = "dodge", stat = "identity", fill = "darkred") +
+  labs(
+    title = "Road Accident Deaths in the USA by Age Group (2019)",
+    x = "Number of Road Traffic Accidents",
+    y = "Age Group"
+  ) +
+  theme_minimal()
+
+```
+
+## Column Chart
+
+```{r}
+
+library(ggplot2)
+
+roaddeaths <- read.csv("C:/Users/kxi220002/Downloads/Road traffic accidents.csv")
+
+year_2019_data <- subset(roaddeaths, Year == 2019)
+
+# Create a clustered bar chart
+
+ggplot(year_2019_data, aes(x = Region)) +
+  geom_col(aes(y = Number, fill = Sex), position = "dodge", stat = "identity") +
+  scale_fill_manual(values = c("Male" = "navy", "Female" = "chocolate", "All" = "grey")) +
+  labs(
+    title = "Road Accident Deaths by Gender and Region (2019)",
+    x = NULL,
+    y = "Number of Road Traffic Accidents",
+    fill = "Gender"
+  ) +
+  theme_minimal()+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```

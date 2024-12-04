@@ -1,0 +1,45 @@
+project:
+  type: website
+website:
+  title: "Karim Veljee"
+  navbar:
+    background: primary
+    left:
+      - text: "Home"
+        href: index.qmd
+      - text: "About"
+        href: about.qmd
+      - text: "Data Visualization - Project"
+        menu:
+          - text: Project
+            href: project/project.qmd
+      - text: "Data Visualization - Assignments"
+        menu:
+          - text: "Assigment 1"
+            href: assignments/assignment1.qmd
+          - text: "Assigment 2"
+            href: assignments/assignment2.qmd
+          - text: "Assigment 3"
+            href: assignments/assignment3.qmd
+          - text: "Assigment 4"
+            href: assignments/assignment4.qmd
+          - text: "Assigment 5"
+            href: assignments/assignment5.qmd
+          - text: "Assigment 6"
+            href: assignments/assignment6.qmd
+          - text: "Assigment 7"
+            href: assignments/assignment7.qmd
+          - text: "Assigment 8"
+            href: assignments/assignment8.qmd
+          - text: "Exercises"
+            href: assignments/exercises.qmd
+    right:
+      - icon: linkedin
+        href: https://www.linkedin.com/in/karimiqbal1
+      - icon: github
+        href: https://www.github.com/Karimveljee
+
+format:
+  html:
+    theme: 
+      light: flatly

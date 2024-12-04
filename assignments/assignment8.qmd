@@ -1,0 +1,197 @@
+---
+title: "Assignment 8"
+author: "Karim Veljee"
+format: 
+  html:
+    toc: true
+    theme: "flatly"
+    highlight-style: "tango"
+    number-sections: true
+---
+
+## Dashboard Practice
+
+### John Doe1
+
+---
+title: "Final Project Storyboard: Team John Doe"
+output: 
+  flexdashboard::flex_dashboard:
+   storyboard: true
+---
+
+<h2>Data Visualization Project</h2>
+
+### Introduction
+
+(Narrative in main window)
+
+<p>
+
+This project is about visualization of the public spending on saving environment.
+
+------------------------------------------------------------------------
+
+(Text in side window)
+
+Prerequisite: install.packages(c("flexdashboard","rbokeh","leaflet", "mapview", "tidycensus"))
+
+This storyboard delivers the final project product by exhibiting the final project in pages.
+
+### Gapminder is based on the Gapminder data, showing the life expectancy, population, GDP PC data, etc.
+
+```{r echo=FALSE, message=FALSE}
+library(ggplot2)
+library(gapminder)
+
+options( scipen = 1 ) # turn off scientific notation with positive value
+ggplot(data = gapminder,
+            mapping = aes(x = gdpPercap,
+                          y = lifeExp, 
+                          color = continent)) + 
+  geom_point(cex = 1) +
+  geom_smooth(method = "loess", color = "red") + scale_x_log10() + 
+  xlab("GDP per capita") +
+  ylab("Life Expectancy") +
+  theme_bw() +
+  theme(legend.position = c(.85, .2)) +
+  theme(text = element_text(size = 14, family = "Palatino"))
+
+```
+
+------------------------------------------------------------------------
+
+Narrative of Gapminder data.
+
+### Data showcase 1: Happy Planet Index
+
+```{r}
+library(ggplot2)
+library(plotly)
+hpi2016=read.csv("https://raw.githubusercontent.com/datageneration/datavisualization/master/data/hpi2016all.csv")
+# Create ggplot
+p <- ggplot(hpi2016, aes(x = AverageLifeExpectancy, y = HappyPlanetIndex, color = Region, shape = Region, text = paste("Country:", Country, "<br>GDPPC:", GDPPC))) +
+  geom_point(size = 1)  +
+  labs(title = "Happy Planet Index vs. Life Expectancy", x = "Average Life Expectancy", y = "Happy Planet Index") +
+  theme_bw() 
+
+# Convert to ggplotly for interactivity
+ggplotly(p, tooltip = "text") %>% 
+  layout(legend = list(x = 0.05, y = .98))
+
+```
+
+------------------------------------------------------------------------
+
+Happy Planet Index data are presented here. This is to demo the story of the chart created using bokeh.
+
+### Data showcase 2: Leaflet
+
+```{r echo=FALSE, out.width=350}
+library(leaflet)
+library(maps)
+
+eppsmap <- leaflet()  |>  setView(-96.7478372, 32.9886268, zoom=14)
+
+esri <- grep("^Esri", providers, value = TRUE)
+
+for (provider in esri) {
+  eppsmap <- eppsmap %>% addProviderTiles(provider, group = provider)
+}
+
+find_me_at <- paste(sep = "<br/>",
+                  "<b><a href='http://karlho.com' target='_blank'>Karl Ho </a></b>",
+                  "<b><a href='http://epps.utdallas.edu' target='_blank'>School of Economic, </a></b>",
+                  "<b><a href='http://epps.utdallas.edu' target='_blank'>Political and Policy Sciences</a></b>",
+                  "<b><a href='http://www.utdallas.edu' target='_blank'>University of Texsa at Dallas</a></b>",
+                  "800 West Campbell Road, GR31",
+                  "Richardson TX 75080"
+)
+eppsmap %>%
+  addLayersControl(baseGroups = names(esri),
+                   options = layersControlOptions(collapsed = TRUE)) %>%
+  # addMiniMap(tiles = esri[[1]], toggleDisplay = TRUE,
+  #           position = "bottomleft") %>%
+  addMarkers(eppsmap, lng=-96.7478372, lat=32.9886268, popup=find_me_at)  %>%
+  htmlwidgets::onRender("
+                        function(el, x) {
+                        var myMap = this;
+                        myMap.on('baselayerchange',
+                        function (e) {
+                        myMap.minimap.changeLayer(L.tileLayer.provider(e.name));
+                        })
+                        }")
+```
+
+------------------------------------------------------------------------
+
+An interactive map usiing leaflet or mapview can be used here. Instructions of using the map can be loaded here.
+
+### Data showcase 3: Base plot
+
+```{r}
+library(RColorBrewer)
+plot(pressure, pch=20, col = "firebrick")
+
+```
+
+------------------------------------------------------------------------
+
+This is a simple base plot.
+
+### Data showcase 4: Hans Rosling
+
+```{r}
+knitr::include_url("https://karlho.github.io/files/Rosling_animate.gif", height = "800")
+```
+
+------------------------------------------------------------------------
+
+External content can be loaded here: in this case, Hans Rosling's famous chart.
+
+### Data showcase 5: D3 Laddar Graph
+
+```{r}
+knitr::include_url("https://karlho.github.io/D3/lg_twclimate/index.html", height = "600")
+```
+
+------------------------------------------------------------------------
+
+You can load your apps or project works here.
+
+### Data showcase 6: Census data - Dallas Income estimate 2020
+
+```{r}
+library(tidycensus)
+options(tigris_use_cache = TRUE)
+
+library(tmap)
+tmap_mode("view")
+
+dallas_income <- get_acs(
+  geography = "tract",
+  variables = "B19013_001",
+  year = 2020,
+  state = "TX",
+  county = "Dallas",
+  geometry = TRUE
+)
+
+library(mapview)
+mapview(dallas_income, zcol = "estimate")
+
+```
+
+------------------------------------------------------------------------
+
+This is created using Census data (Dallas ACS 2020) and tmap package.
+
+### Data showcase 7: Alternate method
+
+```{r}
+knitr::include_url("https://karlho.github.io/spatial/tmap_dallasincome.html", height = "800")
+```
+
+------------------------------------------------------------------------
+
+Upload the output file to GitHub and reference to file address.
